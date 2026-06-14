@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>圣言研读工具 | 多译本对照 · 原文解析 · 笔记系统</title>
+    <!-- 引入 Font Awesome 6 (免费图标库，带阴影效果) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- 使用 Google Fonts 提升英文阅读感 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e9e2d4;  /* 暖杏色背景基底 */
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #2d2a24;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* 整体布局 - 非扁平层次阴影感 */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1920px;
+            margin: 0 auto;
+            background: rgba(245, 240, 230, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        /* ========= 顶部栏 ========= */
+        .top-bar {
+            background: #fff7ef;
+            margin: 12px 20px 8px 20px;
+            border-radius: 28px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255,255,255,0.9);
+            padding: 10px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(210, 180, 140, 0.4);
+        }
+
+        .version-selector {
+            display: flex;
+            gap: 16px;
+            background: #f3efE8;
+            padding: 6px 16px;
+            border-radius: 48px;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02), 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .version-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #5a4a3a;
+        }
+        .version-item input {
+            width: 18px;
+            height: 18px;
+            accent-color: #7c6b54;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .search-area {
+            flex: 1;
+            max-width: 420px;
+            position: relative;
+        }
+        .search-area input {
+            width: 100%;
+            padding: 12px 20px 12px 48px;
+            border: none;
+            background: #fefaf5;
+            border-radius: 48px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05), inset 0 1px 0 #ffffff;
+            transition: all 0.2s ease;
+            border: 1px solid #e2d5c0;
+        }
+        .search-area input:focus {
+            outline: none;
+            border-color: #8f7a63;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+        }
+        .search-area i {
+            position: absolute;
+            left: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #9b8a74;
+            font-size: 1.2rem;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1));
+        }
+
+        .progress-badge {
+            background: #e7dfd1;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #5e4b36;
+            box-shadow: inset 0 1px 0 #fff3e4, 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .progress-badge i {
+            margin-right: 6px;
+            color: #7f6b52;
+        }
+
+        /* ========= 主体三栏 ========= */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            padding: 0 20px 20px 20px;
+            gap: 20px;
+        }
+
+        /* 左侧栏 可折叠 hover 微投影 */
+        .sidebar-left {
+            width: 280px;
+            background: #fffbf5;
+            border-radius: 32px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255,255,240,0.8);
+            overflow-y: auto;
+            padding: 20px 12px;
+            backdrop-filter: blur(2px);
+            border: 1px solid rgba(200, 180, 150, 0.3);
+            transition: all 0.2s;
+        }
+
+        .nav-section {
+            margin-bottom: 28px;
+        }
+        .nav-section h3 {
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b29174;
+            margin-bottom: 16px;
+            padding-left: 8px;
+            font-weight: 600;
+        }
+        .book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .book-item, .chapter-item {
+            padding: 8px 12px;
+            background: #fef7ef;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            border: 1px solid #f0e4d4;
+        }
+        .book-item:hover, .chapter-item:hover {
+            background: #efe2d2;
+            transform: translateX(4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+            border-color: #cfbcA0;
+        }
+        .chapter-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .chapter-item {
+            width: 48px;
+            text-align: center;
+            padding: 6px 0;
+        }
+
+        /* 中央区域 多译本并排滚动 */
+        .center-area {
+            flex: 1;
+            background: #fefaf2;
+            border-radius: 32px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            padding: 20px;
+            border: 1px solid #f0e2d0;
+            backdrop-filter: blur(2px);
+        }
+
+        .verses-panel {
+            display: flex;
+            gap: 24px;
+            flex-direction: row;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+            padding-bottom: 12px;
+        }
+        .version-column {
+            min-width: 320px;
+            flex: 1;
+            background: #ffffffdb;
+            border-radius: 28px;
+            padding: 18px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05), inset 0 1px 0 white;
+            border: 1px solid #ede0cf;
+            transition: all 0.2s;
+        }
+        .version-title {
+            font-size: 1.35rem;
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 600;
+            border-bottom: 2px solid #cbae8c;
+            display: inline-block;
+            margin-bottom: 18px;
+            padding-right: 12px;
+            color: #6a4e2e;
+        }
+        .verse-line {
+            margin-bottom: 14px;
+            line-height: 1.55;
+            font-size: 0.95rem;
+            position: relative;
+            cursor: pointer;
+            padding: 4px 6px;
+            border-radius: 16px;
+            transition: background 0.1s;
+        }
+        .verse-line:hover {
+            background: #f7efE2;
+        }
+        .verse-num {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #b48c5c;
+            background: #f1e8dc;
+            display: inline-block;
+            width: 24px;
+            text-align: center;
+            border-radius: 40px;
+            margin-right: 8px;
+        }
+        .strong {
+            display: inline-block;
+            background: #e9dbcc;
+            border-radius: 24px;
+            font-size: 0.7rem;
+            padding: 1px 6px;
+            margin-left: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            color: #68573e;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            transition: all 0.1s;
+        }
+        .strong:hover {
+            background: #ceb594;
+            color: white;
+            transform: scale(1.02);
+        }
+
+        /* 右侧栏 */
+        .sidebar-right {
+            width: 300px;
+            background: #fffbf5;
+            border-radius: 32px;
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #ece0cf;
+        }
+        .right-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5d5c0;
+            background: #fdf6ec;
+            padding: 0 12px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 14px 0;
+            font-weight: 600;
+            color: #8f755b;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.9rem;
+        }
+        .tab-btn.active {
+            color: #5a3e24;
+            border-bottom: 3px solid #c7a16b;
+            background: #fff4e8;
+        }
+        .tab-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+        .strong-detail, .note-editor {
+            display: none;
+        }
+        .strong-detail.active, .note-editor.active {
+            display: block;
+        }
+        .dict-card {
+            background: #f9f0e4;
+            border-radius: 24px;
+            padding: 16px;
+            box-shadow: inset 0 1px 3px #0001, 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .note-list {
+            margin-top: 16px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .note-item {
+            background: #fef3e8;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 24px;
+            border: 1px solid #dac8b0;
+            background: #fefcf9;
+            margin-top: 10px;
+        }
+        button {
+            background: #dac09e;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 32px;
+            font-weight: 500;
+            margin-top: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.1s;
+        }
+        button:active {
+            transform: scale(0.97);
+        }
+
+        /* 底部栏 */
+        .bottom-bar {
+            background: #efe3d4;
+            margin: 4px 20px 16px 20px;
+            border-radius: 28px;
+            padding: 10px 24px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #735f48;
+            box-shadow: 0 -2px 8px rgba(0,0,0,0.02), 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 滚动条 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2d6c8;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #b6936c;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="top-bar">
+        <div class="version-selector">
+            <label class="version-item"><input type="checkbox" value="CUV" checked> 和合本</label>
+            <label class="version-item"><input type="checkbox" value="NIV" checked> NIV</label>
+            <label class="version-item"><input type="checkbox" value="KJV" checked> KJV</label>
+        </div>
+        <div class="search-area">
+            <i class="fas fa-search"></i>
+            <input type="text" id="globalSearchInput" placeholder="搜索经文关键词 (如「爱」「信心」...)" autocomplete="off">
+        </div>
+        <div class="progress-badge"><i class="fas fa-calendar-week"></i> 今日阅读: 创1-3章 · 连续7日</div>
+        <div class="progress-badge"><i class="fas fa-bookmark"></i> 书签: 诗23</div>
+    </div>
+
+    <div class="main-layout">
+        <!-- 左侧导航 -->
+        <div class="sidebar-left">
+            <div class="nav-section">
+                <h3><i class="fas fa-scroll"></i> 圣经书卷</h3>
+                <div class="book-list" id="bookList">
+                    <!-- 动态生成部分书卷示例 -->
+                </div>
+            </div>
+            <div class="nav-section">
+                <h3><i class="fas fa-layer-group"></i> 章节导航</h3>
+                <div id="chapterNav">点击书卷显示章节</div>
+            </div>
+            <div class="nav-section">
+                <h3><i class="fas fa-pen-fancy"></i> 我的笔记目录</h3>
+                <div id="noteDirectory" class="book-list" style="max-height:180px">暂无笔记，点击经文右侧栏添加</div>
+            </div>
+        </div>
+
+        <!-- 中央多译本对照 -->
+        <div class="center-area" id="centerArea">
+            <div class="verses-panel" id="versesContainer">
+                <!-- 动态渲染和合本、NIV、KJV 经文 -->
+            </div>
+        </div>
+
+        <!-- 右侧栏 原文+笔记 -->
+        <div class="sidebar-right">
+            <div class="right-tabs">
+                <button class="tab-btn active" data-tab="strong">📖 原文解析</button>
+                <button class="tab-btn" data-tab="note">✍️ 我的笔记</button>
+            </div>
+            <div class="tab-content">
+                <div id="strongTab" class="strong-detail active">
+                    <div class="dict-card">
+                        <div id="strongContent">点击经文中的 <span class="strong">H1234</span> 或 <span class="strong">G26</span> 样式按钮<br>查看希伯来/希腊文详细释义</div>
+                    </div>
+                </div>
+                <div id="noteTab" class="note-editor">
+                    <div id="currentVerseNote">当前选中的经文：<span id="selectedVerseRef">未选中</span></div>
+                    <textarea id="noteTextArea" rows="3" placeholder="写下你的灵修笔记..."></textarea>
+                    <button id="saveNoteBtn"><i class="fas fa-save"></i> 保存笔记</button>
+                    <div id="verseNotesList" class="note-list">笔记将显示在此</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="bottom-bar">
+        <span><i class="far fa-copyright"></i> 和合本(公共领域) | NIV版权归Biblica | KJV公共领域 | 原文数据参考信望爱</span>
+        <span><i class="fas fa-microphone"></i> 研经模式 · Strong's 完整字义</span>
+    </div>
+</div>
+
+<script>
+    // ------------------- 模拟经文数据 (和合本 + NIV + KJV 创1:1-8 示例，展示Strong上标) -------------------
+    const bibleSample = {
+        CUV: [
+            { v: 1, text: "起初，神<strong class='strong' data-strong='H430'>אֱלֹהִים</strong>创造天地。", strongRef: ["H430"] },
+            { v: 2, text: "地是空虚混沌，渊面黑暗；神的灵<strong class='strong' data-strong='H7307'>רוּחַ</strong>运行在水面上。", strongRef: ["H7307"] },
+            { v: 3, text: "神<strong class='strong' data-strong='H430'>אֱלֹהִים</strong>说：要有光，就有了光。", strongRef: ["H430"] },
+            { v: 4, text: "神看光是好的，就把光暗分开了。", strongRef: [] },
+            { v: 5, text: "神称光为昼，称暗为夜。有晚上，有早晨，这是头一日。", strongRef: [] },
+            { v: 6, text: "神说：诸水之间要有空气，将水分为上下。", strongRef: [] },
+            { v: 7, text: "神就造出空气，将空气以下的水、空气以上的水分开了。事就这样成了。", strongRef: [] },
+            { v: 8, text: "神称空气为天。有晚上，有早晨，是第二日。", strongRef: [] }
+        ],
+        NIV: [
+            { v: 1, text: "In the beginning God<strong class='strong' data-strong='H430'>Elohim</strong> created the heavens and the earth.", strongRef: ["H430"] },
+            { v: 2, text: "Now the earth was formless and empty, darkness was over the surface of the deep, and the Spirit<strong class='strong' data-strong='H7307'>Ruach</strong> of God was hovering over the waters.", strongRef: ["H7307"] },
+            { v: 3, text: "And God said, 'Let there be light,' and there was light.", strongRef: [] },
+            { v: 4, text: "God saw that the light was good, and he separated the light from the darkness.", strongRef: [] },
+            { v: 5, text: "God called the light 'day,' and the darkness he called 'night.' And there was evening, and there was morning—the first day.", strongRef: [] },
+            { v: 6, text: "And God said, 'Let there be a vault between the waters to separate water from water.'", strongRef: [] },
+            { v: 7, text: "So God made the vault and separated the water under the vault from the water above it. And it was so.", strongRef: [] },
+            { v: 8, text: "God called the vault 'sky.' And there was evening, and there was morning—the second day.", strongRef: [] }
+        ],
+        KJV: [
+            { v: 1, text: "In the beginning God<strong class='strong' data-strong='H430'>Elohim</strong> created the heaven and the earth.", strongRef: ["H430"] },
+            { v: 2, text: "And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit<strong class='strong' data-strong='H7307'>Ruach</strong> of God moved upon the face of the waters.", strongRef: ["H7307"] },
+            { v: 3, text: "And God said, Let there be light: and there was light.", strongRef: [] },
+            { v: 4, text: "And God saw the light, that it was good: and God divided the light from the darkness.", strongRef: [] },
+            { v: 5, text: "And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.", strongRef: [] },
+            { v: 6, text: "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters.", strongRef: [] },
+            { v: 7, text: "And God made the firmament, and divided the waters which were under the firmament from the waters which were above the firmament: and it was so.", strongRef: [] },
+            { v: 8, text: "And God called the firmament Heaven. And the evening and the morning were the second day.", strongRef: [] }
+        ]
+    };
+
+    // Strong's 字典 (扩充完整字义)
+    const strongsDict = {
+        H430: { original: "אֱלֹהִים", translit: "Elohim", meaning: "神，神明，审判官，大能者", pos: "名词 复数", root: "H433", occurrences: "2600+" },
+        H7307: { original: "רוּחַ", translit: "Ruach", meaning: "风，气息，灵，精神", pos: "名词 阴性", root: "H7306", occurrences: "378次" },
+        G26: { original: "ἀγάπη", translit: "Agape", meaning: "爱，圣爱，无私的爱", pos: "名词 阴性", root: "G25", occurrences: "116次" }
+    };
+
+    // 当前选中的 Strong 及 当前选中经文笔记索引
+    let currentStrongKey = null;
+    let currentVerseKey = "创1:1"; // book:章:节
+    let notesDB = {}; // 存储 { "创1:1": "笔记内容" }
+
+    // 渲染多译本
+    function renderVersions(book="创", chapter=1) {
+        const container = document.getElementById('versesContainer');
+        container.innerHTML = '';
+        const selectedVersions = Array.from(document.querySelectorAll('.version-item input:checked')).map(cb => cb.value);
+        for (let ver of selectedVersions) {
+            if (!bibleSample[ver]) continue;
+            const col = document.createElement('div');
+            col.className = 'version-column';
+            col.innerHTML = `<div class="version-title">${ver === 'CUV' ? '和合本' : ver}</div>`;
+            bibleSample[ver].forEach(verse => {
+                const verseDiv = document.createElement('div');
+                verseDiv.className = 'verse-line';
+                verseDiv.setAttribute('data-verse-ref', `创${chapter}:${verse.v}`);
+                verseDiv.innerHTML = `<span class="verse-num">${verse.v}</span> ${verse.text}`;
+                verseDiv.addEventListener('click', (e) => {
+                    if(e.target.classList && e.target.classList.contains('strong')) return;
+                    const ref = verseDiv.getAttribute('data-verse-ref');
+                    currentVerseKey = ref;
+                    document.getElementById('selectedVerseRef').innerText = ref;
+                    loadNotesForVerse(ref);
+                });
+                // 绑定 strong 点击事件 (委托也可)
+                col.appendChild(verseDiv);
+            });
+            container.appendChild(col);
+        }
+        // 重新绑定strong元素的click (动态)
+        document.querySelectorAll('.strong').forEach(el => {
+            el.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const strongVal = el.getAttribute('data-strong');
+                if(strongVal && strongsDict[strongVal]) {
+                    const dict = strongsDict[strongVal];
+                    document.getElementById('strongContent').innerHTML = `
+                        <div style="font-weight:bold;">Strong's ${strongVal}</div>
+                        <div>原文: ${dict.original} (${dict.translit})</div>
+                        <div>词性: ${dict.pos}</div>
+                        <div>字义: ${dict.meaning}</div>
+                        <div>字根: ${dict.root} | 出现次数: ${dict.occurrences}</div>
+                        <div style="margin-top:8px;"><i class="fas fa-scroll"></i> 完整解析: KJV常译作“God/Spirit”</div>
+                    `;
+                } else {
+                    document.getElementById('strongContent').innerHTML = `<div>未收录该编号，但提供扩展预留。编号: ${strongVal}</div>`;
+                }
+                document.querySelector('.tab-btn[data-tab="strong"]').click();
+            });
+        });
+    }
+
+    // 笔记加载保存逻辑
+    function loadNotesForVerse(ref) {
+        const noteListDiv = document.getElementById('verseNotesList');
+        const noteText = notesDB[ref] || '';
+        document.getElementById('noteTextArea').value = noteText;
+        if(noteText.trim()) {
+            noteListDiv.innerHTML = `<div class="note-item"><i class="fas fa-pen"></i> ${noteText.substring(0,80)}</div>`;
+        } else {
+            noteListDiv.innerHTML = '<div class="note-item">暂无笔记，可在此添加灵修笔记。</div>';
+        }
+    }
+    document.getElementById('saveNoteBtn').addEventListener('click', () => {
+        if(currentVerseKey) {
+            const newNote = document.getElementById('noteTextArea').value;
+            notesDB[currentVerseKey] = newNote;
+            loadNotesForVerse(currentVerseKey);
+            updateNoteDirectory();
+        }
+    });
+
+    function updateNoteDirectory() {
+        const dirDiv = document.getElementById('noteDirectory');
+        const entries = Object.entries(notesDB);
+        if(entries.length ===0) { dirDiv.innerHTML = '<div class="book-item">暂无笔记，请点击经文并书写</div>'; return;}
+        dirDiv.innerHTML = entries.map(([ref, content]) => `<div class="book-item" data-ref="${ref}" style="cursor:pointer; font-size:0.8rem;">📘 ${ref} - ${content.substring(0, 28)}</div>`).join('');
+        document.querySelectorAll('[data-ref]').forEach(el => {
+            el.addEventListener('click', () => {
+                currentVerseKey = el.getAttribute('data-ref');
+                document.getElementById('selectedVerseRef').innerText = currentVerseKey;
+                loadNotesForVerse(currentVerseKey);
+                document.querySelector('.tab-btn[data-tab="note"]').click();
+            });
+        });
+    }
+
+    // 模拟搜索: 简单基于当前显示译本的全文过滤 (展示)
+    function performSearch() {
+        const keyword = document.getElementById('globalSearchInput').value.trim().toLowerCase();
+        if(!keyword) {
+            renderVersions();
+            return;
+        }
+        // 动态高亮展示搜索结果: 简单alert提示找到的条数，实际可跳出侧边列表；按照设计需求展示在中央区filter
+        let totalMatches = 0;
+        const selVersions = Array.from(document.querySelectorAll('.version-item input:checked')).map(cb => cb.value);
+        selVersions.forEach(v => {
+            bibleSample[v].forEach(verse => {
+                if(verse.text.toLowerCase().includes(keyword)) totalMatches++;
+            });
+        });
+        alert(`🔍 找到 ${totalMatches} 处经文包含「${keyword}」。\n(完整搜索将对接FlexSearch索引，当前demo模拟关键词匹配)`);
+        // 保持原样显示，但可改进滚动提示；按照完整设计，真实项目会接入本地索引及API
+    }
+
+    // 书卷列表动态生成(创,出利等)
+    const books = ["创世记","出埃及记","利未记","民数记","申命记","诗篇","马太福音"];
+    function buildBookList() {
+        const bookDiv = document.getElementById('bookList');
+        bookDiv.innerHTML = books.map(b => `<div class="book-item" data-book="${b}">📖 ${b}</div>`).join('');
+        document.querySelectorAll('.book-item').forEach(el => {
+            el.addEventListener('click', (e) => {
+                const book = el.getAttribute('data-book');
+                const chapDiv = document.getElementById('chapterNav');
+                chapDiv.innerHTML = `<div class="chapter-grid" id="chapterGrid">${Array.from({length:10}, (_,i)=>`<div class="chapter-item" data-chap="${i+1}">${i+1}</div>`).join('')}</div>`;
+                document.querySelectorAll('.chapter-item').forEach(ch => {
+                    ch.addEventListener('click', () => {
+                        renderVersions("创", parseInt(ch.innerText));
+                    });
+                });
+                renderVersions("创",1);
+            });
+        });
+    }
+
+    // 右侧tab切换
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(tab === 'strong') {
+                document.getElementById('strongTab').classList.add('active');
+                document.getElementById('noteTab').classList.remove('active');
+            } else {
+                document.getElementById('strongTab').classList.remove('active');
+                document.getElementById('noteTab').classList.add('active');
+            }
+        });
+    });
+
+    // 搜索按钮监听 + 回车
+    document.getElementById('globalSearchInput').addEventListener('keypress', (e) => { if(e.key === 'Enter') performSearch(); });
+    // 添加初始笔记演示
+    notesDB["创1:1"] = "起初神创造天地，这是创造之始的荣耀。";
+    notesDB["创1:2"] = "圣灵运行，预备大地。";
+    updateNoteDirectory();
+
+    buildBookList();
+    renderVersions("创",1);
+    // 预设右侧Strong预览内容
+    document.getElementById('strongContent').innerHTML = "点击上标 <strong class='strong'>H430 / H7307</strong> 查看完整希伯来文字义解析。";
+    // 设置当前选中的默认经文
+    currentVerseKey = "创1:1";
+    document.getElementById('selectedVerseRef').innerText = currentVerseKey;
+    loadNotesForVerse(currentVerseKey);
+</script>
+</body>
+</html>

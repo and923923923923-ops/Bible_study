@@ -1,0 +1,36 @@
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+body { background: #f2ecdf; font-family: system-ui, 'Segoe UI', 'Noto Sans CJK TC', sans-serif; color: #2e2a24; padding: 12px 12px 90px 12px; }
+.app { max-width: 700px; margin: 0 auto; }
+.toolbar { background: #fffaf2; border-radius: 32px; box-shadow: 0 8px 18px rgba(0,0,0,0.08), inset 0 1px 0 #fffef8; padding: 12px 16px; margin-bottom: 16px; border: 1px solid #e7d8c4; }
+.row-selectors { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.selector-group { background: #f5ede2; border-radius: 40px; padding: 4px 12px; display: flex; align-items: center; gap: 8px; box-shadow: inset 0 1px 0 #fff9f0, 0 2px 4px rgba(0,0,0,0.05); }
+.selector-group i { color: #a88762; }
+select, .version-switch { background: transparent; border: none; font-size: 0.9rem; font-weight: 500; color: #4e3e2c; padding: 8px 4px; outline: none; }
+.chapter-scroll { margin-top: 12px; overflow-x: auto; white-space: nowrap; padding-bottom: 6px; }
+.chapter-list { display: inline-flex; gap: 8px; }
+.chap { background: #faf3e9; border-radius: 40px; padding: 6px 14px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.chap.active-chap { background: #b69060; color: white; }
+.version-card { background: #fffdf9; border-radius: 36px; box-shadow: 0 12px 24px rgba(0,0,0,0.08); margin-bottom: 20px; padding: 16px 18px; border: 1px solid #ecdfcf; }
+.version-title { font-size: 1.35rem; font-weight: 700; color: #735e44; border-left: 5px solid #c7a16b; padding-left: 12px; margin-bottom: 12px; }
+.verse-item { margin-bottom: 14px; line-height: 1.55; font-size: 0.96rem; display: flex; align-items: baseline; padding: 4px 0; border-bottom: 1px solid #f2e6da; }
+.verse-number { font-weight: 700; color: #bf9a6a; background: #f4ede3; width: 32px; text-align: center; border-radius: 30px; font-size: 0.7rem; margin-right: 12px; flex-shrink: 0; cursor: pointer; }
+.verse-text { flex: 1; }
+.strong { display: inline-block; background: #e7dbcd; border-radius: 30px; font-size: 0.68rem; padding: 2px 8px; margin: 0 2px; font-weight: 600; color: #6f543a; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.selected-verse-highlight { background-color: #fff0e0; border-radius: 20px; padding: 4px 8px; margin: 0 -8px; }
+.fab-container { position: fixed; bottom: 20px; left: 0; right: 0; display: flex; justify-content: center; gap: 14px; z-index: 100; flex-wrap: wrap; }
+.fab { background: #fef7ed; backdrop-filter: blur(12px); border-radius: 60px; padding: 10px 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,245,225,0.6); border: none; font-weight: 600; display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #735e44; cursor: pointer; }
+.drawer { position: fixed; bottom: 0; left: 0; right: 0; background: #fffbf2; border-radius: 32px 32px 0 0; box-shadow: 0 -8px 30px rgba(0,0,0,0.15); transition: transform 0.3s ease; transform: translateY(100%); z-index: 200; max-height: 75vh; overflow-y: auto; border-top: 1px solid #eedfcb; }
+.drawer.open { transform: translateY(0); }
+.drawer-header { padding: 18px 20px 10px; display: flex; justify-content: space-between; font-weight: 700; font-size: 1.2rem; border-bottom: 1px solid #e9dbc9; }
+.drawer-content { padding: 18px 20px 30px; }
+.close-drawer { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #b69060; }
+.note-editor textarea { width: 100%; padding: 12px; border-radius: 24px; border: 1px solid #e3d2be; background: #fffcf7; margin: 12px 0; }
+.small-btn { background: #dfcfba; border: none; border-radius: 40px; padding: 8px 16px; font-weight: 500; cursor: pointer; margin-right: 8px; }
+.search-panel { background: #fff7ef; border-radius: 28px; margin-bottom: 16px; padding: 12px; display: none; }
+.search-panel.open { display: block; }
+.search-input { width: 100%; padding: 12px 16px; border-radius: 40px; border: 1px solid #ddcfbb; background: white; }
+.progress-tag { background: #e7dfd1; border-radius: 24px; padding: 4px 12px; font-size: 0.7rem; display: inline-block; color: #7e684e; }
+.ai-conversation { max-height: 300px; overflow-y: auto; background: #faf5ec; border-radius: 24px; padding: 12px; margin-bottom: 12px; }
+.ai-question { background: #e7ddcf; border-radius: 20px; padding: 8px 12px; margin: 6px 0; }
+.ai-answer { background: #fff3e4; border-radius: 20px; padding: 8px 12px; margin: 6px 0; }
+.api-key-warning { font-size: 0.7rem; margin-bottom: 8px; }

@@ -1,0 +1,425 @@
+真的很抱歉！因為系統顯示介面的底層問題，剛才我使用的特殊程式碼方塊在你的畫面上完全被隱藏了。
+
+為了確保你一定能看到並複製，我現在**移除所有的程式碼方塊標籤**，直接把程式碼當作一般文字貼在下面。
+
+請直接複製以下從 `<!DOCTYPE html>` 開始，一直到最後面 `</html>` 的所有文字，並存成你的 `index.html`：
+
+---
+
+```
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
+
+    body {
+        font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    header {
+        background-color: var(--panel-bg);
+        padding: 15px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    header h1 {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+    }
+
+    .controls-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    select, button, input {
+        padding: 8px 12px;
+        font-size: 0.95rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: #fff;
+    }
+
+    button {
+        background-color: var(--primary-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    button:hover {
+        background-color: #3b5984;
+    }
+
+    .api-key-input {
+        width: 220px;
+        border-color: #ced4da;
+    }
+
+    .main-container {
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    }
+
+    .bible-panel {
+        flex: 1.2;
+        padding: 25px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        border-right: 1px solid var(--border-color);
+    }
+
+    .verse-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        padding: 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .verse-row:hover {
+        background-color: var(--accent-color);
+    }
+
+    .verse-num {
+        font-weight: bold;
+        color: var(--primary-color);
+        margin-right: 8px;
+    }
+
+    .lang-zh, .lang-en {
+        line-height: 1.6;
+        font-size: 1.05rem;
+    }
+
+    .side-panel {
+        flex: 1;
+        background-color: var(--panel-bg);
+        display: flex;
+        flex-direction: column;
+        border-left: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .panel-section {
+        padding: 20px;
+        overflow-y: auto;
+    }
+
+    #lexicon-section {
+        flex: 1;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    #ai-section {
+        flex: 1.5;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background-color: #fafbfc;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        font-weight: bold;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 6px;
+        color: var(--primary-color);
+        margin-bottom: 10px;
+    }
+
+    .ai-title {
+        border-bottom-color: var(--ai-color);
+        color: var(--ai-color);
+    }
+
+    .prompt-tags {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+    }
+
+    .tag-btn {
+        background-color: #fff;
+        color: #495057;
+        border: 1px solid #dee2e6;
+        padding: 4px 10px;
+        font-size: 0.85rem;
+        border-radius: 20px;
+    }
+
+    .tag-btn:hover {
+        background-color: #e9ecef;
+        color: #212529;
+    }
+
+    textarea {
+        width: 100%;
+        height: 80px;
+        padding: 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        resize: none;
+        font-size: 0.95rem;
+    }
+
+    .ai-response-box {
+        flex: 1;
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        overflow-y: auto;
+        white-space: pre-line;
+    }
+
+    .word-card {
+        background: var(--bg-color);
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .placeholder-text {
+        color: #6c757d;
+        font-style: italic;
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 1024px) {
+        .main-container { flex-direction: column; }
+        .verse-row { grid-template-columns: 1fr; gap: 5px; }
+        .side-panel { height: 60vh; }
+    }
+</style>
+
+```
+
+```
+<header>
+    <h1>聖經研讀工具</h1>
+    <div class="controls-group">
+        <select id="book-select">
+            <option value="JHN">約翰福音 (John)</option>
+            <option value="GEN">創世記 (Genesis)</option>
+            <option value="ROM">羅馬書 (Romans)</option>
+        </select>
+        <select id="chapter-select"></select>
+        <button id="search-btn">讀取經文</button>
+    </div>
+    <div class="controls-group" style="margin-left: auto;">
+        <input type="password" id="api-key" class="api-key-input" placeholder="請輸入你的 DeepSeek API Key">
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="bible-panel" id="bible-content">
+        <p class="placeholder-text">請點擊上方「讀取經文」按鈕開始閱讀。</p>
+    </div>
+
+    <div class="side-panel">
+        <div class="panel-section" id="lexicon-section">
+            <div class="section-title">原文查考</div>
+            <div id="lexicon-content">
+                <p class="placeholder-text">點擊左側經文查看字根解釋</p>
+            </div>
+        </div>
+
+        <div class="panel-section" id="ai-section">
+            <div class="section-title ai-title">DeepSeek AI 釋經導師</div>
+            <div class="prompt-tags">
+                <button class="tag-btn" onclick="setPrompt('歷史背景')">歷史背景</button>
+                <button class="tag-btn" onclick="setPrompt('神學義理')">神學義理</button>
+                <button class="tag-btn" onclick="setPrompt('生活應用')">生活應用</button>
+            </div>
+            <textarea id="ai-prompt" placeholder="選擇左側經文並點擊上方快捷鍵，或在此輸入想詢問 AI 的問題..."></textarea>
+            <button id="ask-ai-btn" style="background-color: var(--ai-color);">向 DeepSeek 提問</button>
+            <div class="ai-response-box" id="ai-response">等待您的提問...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const mockLexicon = {
+        "JHN_3_16": [
+            { strong: "G25", original: "ἀγαπάω (agapáo)", trans: "神「愛」世人", definition: "神聖、理智、克己的愛。非單純情感，而是意志的抉擇，主動追求對方的最高福祉。" },
+            { strong: "G2889", original: "κόσμος (kosmos)", trans: "愛「世人」", definition: "世界、宇宙、人類社會。在此特指與神疏離、需要救贖的受造人類。" }
+        ],
+        "GEN_1_1": [
+            { strong: "H7225", original: "רֵאשִׁית (reshith)", trans: "「起初」", definition: "開始、首要、第一階段。指時間的起點或萬物的開端。" },
+            { strong: "H1254", original: "בָּרָא (bara)", trans: "神「創造」", definition: "創造、塑造成形。在舊約中，此字的發出者永遠只有神，指無中生有的創造。" }
+        ]
+    };
+
+    let currentActiveVerse = ""; 
+
+    const bookSelect = document.getElementById('book-select');
+    const chapterSelect = document.getElementById('chapter-select');
+    const searchBtn = document.getElementById('search-btn');
+    const bibleContent = document.getElementById('bible-content');
+    const lexiconContent = document.getElementById('lexicon-content');
+    const aiPrompt = document.getElementById('ai-prompt');
+    const askAiBtn = document.getElementById('ask-ai-btn');
+    const aiResponse = document.getElementById('ai-response');
+    const apiKeyInput = document.getElementById('api-key');
+
+    function initChapters() {
+        chapterSelect.innerHTML = '';
+        for(let i = 1; i <= 3; i++) {
+            let opt = document.createElement('option');
+            opt.value = i; opt.textContent = `第 ${i} 章`;
+            chapterSelect.appendChild(opt);
+        }
+    }
+    bookSelect.addEventListener('change', initChapters);
+    initChapters();
+
+    async function fetchBible() {
+        const book = bookSelect.value;
+        const chapter = chapterSelect.value;
+        bibleContent.innerHTML = '<p class="placeholder-text">經文載入中...</p>';
+        
+        try {
+            const enResponse = await fetch(`[https://bible-api.com/$](https://bible-api.com/$){book}+${chapter}?translation=kjv`);
+            const enData = await enResponse.json();
+            const zhResponse = await fetch(`[https://bible-api.com/$](https://bible-api.com/$){book}+${chapter}?translation=cuv`);
+            const zhData = await zhResponse.json();
+
+            bibleContent.innerHTML = '';
+            const totalVerses = Math.max(enData.verses.length, zhData.verses.length);
+            
+            for (let i = 0; i < totalVerses; i++) {
+                const enVerse = enData.verses[i];
+                const zhVerse = zhData.verses[i];
+                if (!enVerse) continue;
+
+                const verseNum = enVerse.verse;
+                const verseId = `${book}_${chapter}_${verseNum}`;
+                const textSummary = `${bookSelect.options[bookSelect.selectedIndex].text} ${chapter}:${verseNum} (${zhVerse?zhVerse.text.trim():''})`;
+
+                const row = document.createElement('div');
+                row.className = 'verse-row';
+                row.innerHTML = `
+                    <div class="lang-zh"><span class="verse-num">${verseNum}</span>${zhVerse ? zhVerse.text : ''}</div>
+                    <div class="lang-en"><span class="verse-num">${verseNum}</span>${enVerse.text}</div>
+                `;
+
+                row.addEventListener('click', () => {
+                    currentActiveVerse = textSummary;
+                    showLexicon(verseId, `${bookSelect.options[bookSelect.selectedIndex].text} ${chapter}:${verseNum}`);
+                    aiPrompt.value = `請針對【${currentActiveVerse}】這段經文，進行深度的神學與歷史背景分析。`;
+                });
+                
+                bibleContent.appendChild(row);
+            }
+        } catch (error) {
+            bibleContent.innerHTML = '<p class="placeholder-text" style="color:red;">載入失敗，請檢查網路。</p>';
+        }
+    }
+
+    function showLexicon(verseId, titleText) {
+        lexiconContent.innerHTML = '';
+        if (mockLexicon[verseId]) {
+            mockLexicon[verseId].forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'word-card';
+                card.innerHTML = `<strong>${item.strong} ${item.original}</strong><br><span style="font-size:0.9rem; color:#4a6fa5;">${item.trans}</span>：${item.definition}`;
+                lexiconContent.appendChild(card);
+            });
+        } else {
+            lexiconContent.innerHTML = '<p class="placeholder-text">此範例節期尚無預載原文編號。建議測試：約翰福音 3:16 或 創世記 1:1</p>';
+        }
+    }
+
+    function setPrompt(type) {
+        if (!currentActiveVerse) {
+            alert("請先點擊左側的某一行聖經經文！");
+            return;
+        }
+        if (type === '歷史背景') {
+            aiPrompt.value = `請說明【${currentActiveVerse}】這段經文寫作時的歷史文化背景、作者意圖，以及最初讀者是如何理解這段話的？`;
+        } else if (type === '神學義理') {
+            aiPrompt.value = `請深入剖析【${currentActiveVerse}】核心字詞在基督教神學中的核心義理，是否有其他經文可互為對照？`;
+        } else if (type === '生活應用') {
+            aiPrompt.value = `對於現代基督徒或讀者而言，【${currentActiveVerse}】這段話在日常工作、家庭、心理調適上，可以帶來什麼實際的指引與生活應用？`;
+        }
+    }
+
+    async function askDeepSeek() {
+        const apiKey = apiKeyInput.value.trim();
+        const promptText = aiPrompt.value.trim();
+
+        if (!apiKey) {
+            alert("請先在右上方輸入您的 DeepSeek API Key！");
+            return;
+        }
+        if (!promptText) {
+            alert("請輸入您想發問的問題或選擇左側經文。");
+            return;
+        }
+
+        aiResponse.textContent = "DeepSeek 正在思考並撰寫回答中，請稍候...";
+        askAiBtn.disabled = true;
+
+        try {
+            const response = await fetch('[https://api.deepseek.com/v1/chat/completions](https://api.deepseek.com/v1/chat/completions)', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: "deepseek-chat",
+                    messages: [
+                        { role: "system", content: "你是一位精通希伯來文、希臘文、教會歷史與系統神學的聖經學者。請用溫和、專業、客觀且條理分明的客氣態度，為使用者解答聖經疑問。" },
+                        { role: "user", content: promptText }
+                    ],
+                    temperature: 0.7
+                })
+            });
+
+            const data = await response.json();
+            
+            if (data.choices && data.choices[0]) {
+                aiResponse.textContent = data.choices[0].message.content;
+            } else if (data.error) {
+                aiResponse.textContent = `API 錯誤: ${data.error.message}`;
+            } else {
+                aiResponse.textContent = "無法取得有效回應，請確認 API Key 狀態。";
+            }
+
+        } catch (error) {
+            console.error(error);
+            aiResponse.textContent = "連線失敗，請檢查網路，或確認是否遭遇跨網域 (CORS) 限制。";
+        } finally {
+            askAiBtn.disabled = false;
+        }
+    }
+
+    searchBtn.addEventListener('click', fetchBible);
+    askAiBtn.addEventListener('click', askDeepSeek);
+</script>
+

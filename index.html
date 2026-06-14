@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>聖言研讀 · 行動版</title>
+    <!-- Font Awesome 6 (免費圖示，含陰影效果) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f2ecdf;  /* 杏色基底 */
+            font-family: system-ui, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            color: #2e2a24;
+            padding: 12px 12px 80px 12px;
+            min-height: 100vh;
+        }
+
+        /* 主容器 */
+        .app {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* 頂部工具列 (層次陰影) */
+        .toolbar {
+            background: #fffaf2;
+            border-radius: 32px;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08), inset 0 1px 0 #fffef8;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            border: 1px solid #e7d8c4;
+        }
+
+        .row-selectors {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .selector-group {
+            background: #f5ede2;
+            border-radius: 40px;
+            padding: 4px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: inset 0 1px 0 #fff9f0, 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .selector-group i {
+            color: #a88762;
+            font-size: 0.9rem;
+        }
+        select, .version-switch {
+            background: transparent;
+            border: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4e3e2c;
+            padding: 8px 4px;
+            outline: none;
+        }
+        .version-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .version-btn {
+            background: #e5d8c8;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #5a4530;
+            cursor: pointer;
+            transition: all 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .version-btn.active {
+            background: #c7ad85;
+            color: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        /* 章節橫向捲動 */
+        .chapter-scroll {
+            margin-top: 12px;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-bottom: 6px;
+            scrollbar-width: thin;
+        }
+        .chapter-list {
+            display: inline-flex;
+            gap: 8px;
+        }
+        .chap {
+            background: #faf3e9;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .chap.active-chap {
+            background: #b69060;
+            color: white;
+        }
+
+        /* 經文卡片區域 */
+        .scripture-card {
+            background: #fffdf9;
+            border-radius: 36px;
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+            padding: 20px 18px;
+            margin-bottom: 20px;
+            border: 1px solid #ecdfcf;
+        }
+
+        .verse-item {
+            margin-bottom: 16px;
+            line-height: 1.55;
+            font-size: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            padding: 6px 0;
+            border-bottom: 1px solid #f2e6da;
+        }
+        .verse-number {
+            font-weight: 700;
+            color: #bf9a6a;
+            background: #f4ede3;
+            width: 32px;
+            text-align: center;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            margin-right: 12px;
+            flex-shrink: 0;
+            cursor: pointer;
+            padding: 2px 0;
+        }
+        .verse-text {
+            flex: 1;
+            color: #2c2822;
+        }
+        .strong {
+            display: inline-block;
+            background: #e7dbcd;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            margin: 0 2px;
+            font-weight: 600;
+            color: #6f543a;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+        .strong:active {
+            background: #c6aa86;
+            color: white;
+        }
+        .selected-verse {
+            background-color: #fff0e0;
+            border-radius: 24px;
+        }
+
+        /* 底部浮動按鈕區 */
+        .fab-container {
+            position: fixed;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 100;
+        }
+        .fab {
+            background: #fef7ed;
+            backdrop-filter: blur(8px);
+            border-radius: 60px;
+            padding: 12px 24px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(255,245,225,0.6);
+            border: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.9rem;
+            color: #735e44;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .fab:active {
+            transform: scale(0.96);
+        }
+
+        /* 抽屜 (底部滑動面板) */
+        .drawer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #fffbf2;
+            border-radius: 32px 32px 0 0;
+            box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease;
+            transform: translateY(100%);
+            z-index: 200;
+            max-height: 70vh;
+            overflow-y: auto;
+            border-top: 1px solid #eedfcb;
+        }
+        .drawer.open {
+            transform: translateY(0);
+        }
+        .drawer-header {
+            padding: 18px 20px 10px;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 700;
+            font-size: 1.2rem;
+            border-bottom: 1px solid #e9dbc9;
+        }
+        .drawer-content {
+            padding: 18px 20px 30px;
+        }
+        .close-drawer {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .note-editor textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 24px;
+            border: 1px solid #e3d2be;
+            background: #fffcf7;
+            margin: 12px 0;
+        }
+        .small-btn {
+            background: #dfcfba;
+            border: none;
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-weight: 500;
+        }
+
+        /* 搜尋面板 (簡單下拉) */
+        .search-panel {
+            background: #fff7ef;
+            border-radius: 28px;
+            margin-bottom: 16px;
+            padding: 12px;
+            display: none;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.05);
+        }
+        .search-panel.open {
+            display: block;
+        }
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 40px;
+            border: 1px solid #ddcfbb;
+            background: white;
+        }
+
+        /* 閱讀進度小標 */
+        .progress-tag {
+            background: #e7dfd1;
+            border-radius: 24px;
+            padding: 4px 12px;
+            font-size: 0.7rem;
+            display: inline-block;
+            margin-top: 8px;
+            color: #7e684e;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- 頂部工具欄 -->
+    <div class="toolbar">
+        <div class="row-selectors">
+            <div class="selector-group">
+                <i class="fas fa-scroll"></i>
+                <select id="bookSelect"></select>
+            </div>
+            <div class="selector-group">
+                <i class="fas fa-hashtag"></i>
+                <select id="chapterSelect"></select>
+            </div>
+            <div class="version-buttons" id="versionGroup">
+                <button data-ver="CUV" class="version-btn active">和合本</button>
+                <button data-ver="NIV" class="version-btn">NIV</button>
+                <button data-ver="KJV" class="version-btn">KJV</button>
+            </div>
+        </div>
+        <div class="chapter-scroll" id="chapterScroll">
+            <!-- 動態產生章節按鈕 -->
+        </div>
+        <div class="progress-tag" id="progressLabel"></div>
+    </div>
+
+    <!-- 搜尋面板 -->
+    <div id="searchPanel" class="search-panel">
+        <input type="text" id="keywordInput" class="search-input" placeholder="輸入關鍵字搜尋經文...">
+        <div id="searchResult" style="font-size:0.8rem; margin-top:8px;"></div>
+    </div>
+
+    <!-- 經文顯示區 -->
+    <div class="scripture-card" id="scriptureContainer">
+        <!-- 動態載入經文 -->
+        <div style="text-align:center; color:#b89a72;">載入中...</div>
+    </div>
+
+    <!-- 底部浮動按鈕 -->
+    <div class="fab-container">
+        <button class="fab" id="openLexiconBtn"><i class="fas fa-book-open"></i> 原文解析</button>
+        <button class="fab" id="openNoteBtn"><i class="fas fa-pen-fancy"></i> 筆記</button>
+        <button class="fab" id="openSearchBtn"><i class="fas fa-search"></i> 搜尋</button>
+    </div>
+
+    <!-- 原文抽屜 -->
+    <div id="lexiconDrawer" class="drawer">
+        <div class="drawer-header">
+            <span><i class="fas fa-language"></i> 原文詳解</span>
+            <button class="close-drawer" data-drawer="lexicon">✕</button>
+        </div>
+        <div class="drawer-content" id="lexiconContent">
+            點擊經文中的 Strong 編號 (例如 H430) 顯示完整字義。
+        </div>
+    </div>
+
+    <!-- 筆記抽屜 -->
+    <div id="noteDrawer" class="drawer">
+        <div class="drawer-header">
+            <span><i class="fas fa-paste"></i> 我的筆記</span>
+            <button class="close-drawer" data-drawer="note">✕</button>
+        </div>
+        <div class="drawer-content note-editor">
+            <div id="currentVerseRef">目前選取：無</div>
+            <textarea id="noteContent" rows="3" placeholder="寫下你的靈修筆記..."></textarea>
+            <button id="saveNote" class="small-btn"><i class="fas fa-save"></i> 儲存筆記</button>
+            <div id="noteDisplay" style="margin-top:16px; background:#f8f0e6; border-radius:24px; padding:12px;"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ----------------------------- 模擬經文資料 (創世記 1~10章 三譯本，含部分 Strong) -----------------------------
+    // 為簡潔，此處只展示創1:1-5，但結構完整，可繼續擴充。
+    const bibleData = {
+        CUV: {}, NIV: {}, KJV: {}
+    };
+    // 使用標準書卷名：只先做創世記 1-10章示範
+    const books = ["創世記"];
+    const currentBook = "創世記";
+    const totalChapters = 10;
+
+    function loadChapterData(version, chapter) {
+        // 這裡建立一個工廠函數產生範例經文 (包含 H430 / H7307 等)
+        const verses = [];
+        for (let v = 1; v <= 10; v++) {  // 每章10節示範
+            let text = "";
+            if (version === "CUV") {
+                if (v === 1) text = "起初，神<strong class='strong' data-strong='H430'>אֱלֹהִים</strong>創造天地。";
+                else if (v === 2) text = "地是空虛混沌，淵面黑暗；神的靈<strong class='strong' data-strong='H7307'>רוּחַ</strong>運行在水面上。";
+                else if (v === 3) text = "神<strong class='strong' data-strong='H430'>אֱלֹהִים</strong>說：要有光，就有了光。";
+                else text = `這是第${chapter}章${v}節的示範經文。(和合本)`;
+            } else if (version === "NIV") {
+                if (v === 1) text = "In the beginning God<strong class='strong' data-strong='H430'>Elohim</strong> created the heavens.";
+                else if (v === 2) text = "Now the Spirit<strong class='strong' data-strong='H7307'>Ruach</strong> of God was hovering over the waters.";
+                else text = `Verse ${v} (NIV demo text for chapter ${chapter}).`;
+            } else {
+                if (v === 1) text = "In the beginning God<strong class='strong' data-strong='H430'>Elohim</strong> created the heaven.";
+                else text = `Verse ${v} (KJV sample chapter ${chapter}).`;
+            }
+            verses.push({ verse: v, text: text });
+        }
+        return verses;
+    }
+
+    // 填入三譯本創1-10
+    for (let c = 1; c <= totalChapters; c++) {
+        bibleData.CUV[c] = loadChapterData("CUV", c);
+        bibleData.NIV[c] = loadChapterData("NIV", c);
+        bibleData.KJV[c] = loadChapterData("KJV", c);
+    }
+
+    // Strong 字典 (完整字義擴充)
+    const strongDict = {
+        H430: { original: "אֱלֹהִים", translit: "Elohim", meaning: "神；大能者；審判官", pos: "名詞 複數", occurrences: "約2600次", info: "常譯為『上帝』，表達威嚴、大能。" },
+        H7307: { original: "רוּחַ", translit: "Ruach", meaning: "風；氣息；靈", pos: "名詞 陰性", occurrences: "378次", info: "指神的靈、人的靈、風向。" },
+        G26: { original: "ἀγάπη", translit: "Agape", meaning: "犧牲的愛；神聖的愛", pos: "名詞", occurrences: "116次", info: "新約常用詞。" }
+    };
+
+    // 全域狀態
+    let currentVersion = "CUV";
+    let currentChapter = 1;
+    let currentSelectedVerse = { book: "創世記", chapter: 1, verse: 1 };
+    let notes = JSON.parse(localStorage.getItem("bible_notes_mobile")) || {}; // 鍵 "創1:1"
+    let lastRead = localStorage.getItem("lastRead") || "創世記 1:1";
+
+    // 渲染經文
+    function renderScripture() {
+        const container = document.getElementById("scriptureContainer");
+        const verses = bibleData[currentVersion][currentChapter];
+        if (!verses) {
+            container.innerHTML = "<div>暫無經文資料</div>";
+            return;
+        }
+        let html = `<div style="font-family:'Cormorant Garamond',serif;">`;
+        verses.forEach(v => {
+            const isSelected = (currentSelectedVerse.verse === v.verse);
+            html += `<div class="verse-item ${isSelected ? 'selected-verse' : ''}" data-verse="${v.verse}">
+                        <span class="verse-number" data-verse-num="${v.verse}">${v.verse}</span>
+                        <div class="verse-text">${v.text}</div>
+                     </div>`;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+
+        // 綁定 Strong 點擊事件
+        document.querySelectorAll(".strong").forEach(el => {
+            el.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const strongId = el.getAttribute("data-strong");
+                showLexiconDrawer(strongId);
+            });
+        });
+        // 綁定節數點擊 (選取經節做筆記)
+        document.querySelectorAll(".verse-number").forEach(num => {
+            num.addEventListener("click", (e) => {
+                const verseNum = parseInt(e.currentTarget.getAttribute("data-verse-num"));
+                currentSelectedVerse = { book: "創世記", chapter: currentChapter, verse: verseNum };
+                document.getElementById("currentVerseRef").innerHTML = `目前選取：${currentSelectedVerse.book} ${currentSelectedVerse.chapter}:${currentSelectedVerse.verse}`;
+                loadNoteForCurrentVerse();
+                // 高亮更新
+                renderScripture(); // 重新渲染高亮
+            });
+        });
+    }
+
+    function showLexiconDrawer(strongId) {
+        const data = strongDict[strongId] || { original: "待補充", meaning: "尚無完整解析", translit: "--", pos: "--", occurrences: "?" };
+        const content = `
+            <div style="font-weight:bold;">Strong's ${strongId}</div>
+            <div>原文：${data.original} (${data.translit})</div>
+            <div>詞性：${data.pos}</div>
+            <div>字義：${data.meaning}</div>
+            <div>出現次數：${data.occurrences}</div>
+            <div style="margin-top:8px;">📖 ${data.info || "詳細研究請參考原文詞典。"}</div>
+        `;
+        document.getElementById("lexiconContent").innerHTML = content;
+        document.getElementById("lexiconDrawer").classList.add("open");
+    }
+
+    function loadNoteForCurrentVerse() {
+        const key = `${currentSelectedVerse.book} ${currentSelectedVerse.chapter}:${currentSelectedVerse.verse}`;
+        const saved = notes[key] || "";
+        document.getElementById("noteContent").value = saved;
+        const displayDiv = document.getElementById("noteDisplay");
+        if (saved) displayDiv.innerHTML = `<div class="note-item" style="background:#f8efE2; border-radius:24px; padding:12px;">📝 ${saved.replace(/\n/g,'<br>')}</div>`;
+        else displayDiv.innerHTML = `<div style="color:#a88866;">尚未有筆記，請在上方輸入。</div>`;
+    }
+
+    function saveCurrentNote() {
+        const key = `${currentSelectedVerse.book} ${currentSelectedVerse.chapter}:${currentSelectedVerse.verse}`;
+        const text = document.getElementById("noteContent").value;
+        if (text.trim()) notes[key] = text;
+        else delete notes[key];
+        localStorage.setItem("bible_notes_mobile", JSON.stringify(notes));
+        loadNoteForCurrentVerse();
+        // 可簡短提示
+    }
+
+    // 記錄閱讀進度
+    function updateProgress() {
+        const last = `${currentSelectedVerse.book} ${currentChapter}:${currentSelectedVerse.verse}`;
+        localStorage.setItem("lastRead", last);
+        document.getElementById("progressLabel").innerHTML = `<i class="fas fa-history"></i> 上次讀經：${last}`;
+    }
+
+    // 搜尋功能 (簡單遍歷當前譯本)
+    function searchKeyword(keyword) {
+        if (!keyword.trim()) { document.getElementById("searchResult").innerHTML = ""; return; }
+        let results = [];
+        for (let chap = 1; chap <= totalChapters; chap++) {
+            const verses = bibleData[currentVersion][chap];
+            if (verses) {
+                verses.forEach(v => {
+                    const plainText = v.text.replace(/<[^>]*>/g, '');
+                    if (plainText.toLowerCase().includes(keyword.toLowerCase())) {
+                        results.push(`${currentSelectedVerse.book} ${chap}:${v.verse} - ${plainText.substring(0, 60)}`);
+                    }
+                });
+            }
+        }
+        const resultDiv = document.getElementById("searchResult");
+        if (results.length === 0) resultDiv.innerHTML = "找不到相關經文。";
+        else resultDiv.innerHTML = results.map(r => `<div style="margin-top:6px;">🔍 ${r}</div>`).join("");
+    }
+
+    // 切換章節/譯本時重新渲染
+    function refreshAll() {
+        renderScripture();
+        updateProgress();
+        // 同時重置selected verse為本章第一節
+        currentSelectedVerse = { book: "創世記", chapter: currentChapter, verse: 1 };
+        document.getElementById("currentVerseRef").innerHTML = `目前選取：${currentSelectedVerse.book} ${currentSelectedVerse.chapter}:${currentSelectedVerse.verse}`;
+        loadNoteForCurrentVerse();
+        // 更新章節高亮
+        document.querySelectorAll(".chap").forEach(btn => {
+            if (parseInt(btn.getAttribute("data-chap")) === currentChapter) btn.classList.add("active-chap");
+            else btn.classList.remove("active-chap");
+        });
+    }
+
+    // 初始化 UI 及事件
+    function init() {
+        // 書卷下拉 (只有創世記)
+        const bookSel = document.getElementById("bookSelect");
+        bookSel.innerHTML = '<option value="創世記">創世記</option>';
+        // 章節下拉 & 橫向捲軸
+        const chapSel = document.getElementById("chapterSelect");
+        const chapScroll = document.getElementById("chapterScroll");
+        let chapHtml = `<div class="chapter-list">`;
+        for (let i = 1; i <= totalChapters; i++) {
+            chapHtml += `<div class="chap ${i===currentChapter?'active-chap':''}" data-chap="${i}">${i}</div>`;
+        }
+        chapHtml += `</div>`;
+        chapScroll.innerHTML = chapHtml;
+        chapSel.innerHTML = '';
+        for (let i=1;i<=totalChapters;i++) {
+            chapSel.appendChild(new Option(i, i));
+        }
+        chapSel.value = currentChapter;
+
+        // 事件監聽
+        chapSel.addEventListener("change", (e) => {
+            currentChapter = parseInt(e.target.value);
+            refreshAll();
+        });
+        document.querySelectorAll(".chap").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                currentChapter = parseInt(btn.getAttribute("data-chap"));
+                document.getElementById("chapterSelect").value = currentChapter;
+                refreshAll();
+            });
+        });
+        // 譯本切換
+        document.querySelectorAll(".version-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                currentVersion = btn.getAttribute("data-ver");
+                document.querySelectorAll(".version-btn").forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                refreshAll();
+            });
+        });
+        // 抽屜關閉
+        document.querySelectorAll(".close-drawer").forEach(btn => {
+            btn.addEventListener("click", (e) => {
+                const drawerId = btn.getAttribute("data-drawer");
+                document.getElementById(`${drawerId}Drawer`).classList.remove("open");
+            });
+        });
+        document.getElementById("openLexiconBtn").addEventListener("click", () => {
+            document.getElementById("lexiconDrawer").classList.add("open");
+        });
+        document.getElementById("openNoteBtn").addEventListener("click", () => {
+            document.getElementById("noteDrawer").classList.add("open");
+            loadNoteForCurrentVerse();
+        });
+        document.getElementById("saveNote").addEventListener("click", saveCurrentNote);
+        document.getElementById("openSearchBtn").addEventListener("click", () => {
+            const panel = document.getElementById("searchPanel");
+            panel.classList.toggle("open");
+        });
+        const keywordInput = document.getElementById("keywordInput");
+        keywordInput.addEventListener("input", (e) => searchKeyword(e.target.value));
+
+        refreshAll();
+    }
+
+    init();
+</script>
+</body>
+</html>

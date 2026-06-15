@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>聖經測試</title>
+</head>
+<body>
+    <h2>創世記 第1章</h2>
+    <div id="output"></div>
+
+    <script src="bibleText.js"></script>
+    <script>
+        // 檢查 bibleText 是否存在
+        if (typeof bibleText === 'undefined') {
+            document.getElementById('output').innerHTML = '錯誤：bibleText.js 沒有載入，請確認檔案存在。';
+        } else {
+            // 解析經文，顯示創世記第1章
+            let output = '<ul>';
+            for (let i = 0; i < bibleText.length; i++) {
+                let line = bibleText[i];
+                if (line.startsWith('創1:')) {
+                    let parts = line.split(' ');
+                    let verse = parts[0].split(':')[1];
+                    let text = parts.slice(1).join(' ');
+                    output += `<li><strong>${verse}</strong> ${text}</li>`;
+                }
+            }
+            output += '</ul><p>總共載入 ' + bibleText.length + ' 節經文。</p>';
+            document.getElementById('output').innerHTML = output;
+        }
+    </script>
+</body>
+</html>

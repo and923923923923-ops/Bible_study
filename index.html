@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>立體聖經工具 · 讀經·AI·筆記</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #e2d4c0;
+            font-family: 'Segoe UI', 'Roboto', 'Noto Sans TC', system-ui, sans-serif;
+            padding: 16px;
+            color: #3e2a1f;
+        }
+
+        .app-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #fffaf2;
+            border-radius: 40px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,250,230,0.9);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(145deg, #dbbd92, #c4a16a);
+            padding: 1.6rem 1.8rem;
+            color: #2d241a;
+            text-shadow: 0 1px 0 #f7e9d4;
+            box-shadow: inset 0 -1px 0 rgba(0,0,0,0.08), 0 6px 14px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .header h1 small {
+            font-size: 0.7rem;
+            background: #2d241acc;
+            padding: 5px 14px;
+            border-radius: 40px;
+            color: #fef0df;
+            text-shadow: none;
+        }
+
+        .card {
+            background: #fff7ed;
+            margin: 18px 20px;
+            border-radius: 32px;
+            padding: 1.2rem 1.5rem;
+            box-shadow: 8px 8px 18px rgba(0, 0, 0, 0.05), -4px -4px 12px #fffcf5, inset 0 1px 0 white;
+            transition: all 0.2s;
+        }
+
+        .control-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .control-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: #8b6b42;
+            letter-spacing: 0.5px;
+        }
+
+        select, input, button, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 1px solid #eddbbc;
+            background: #ffffff;
+            font-size: 0.9rem;
+            font-family: inherit;
+            transition: 0.2s;
+            outline: none;
+        }
+
+        select:focus, input:focus, textarea:focus {
+            border-color: #bb8a5c;
+            box-shadow: 0 0 0 3px rgba(187,138,92,0.2);
+        }
+
+        button {
+            background: #ecdbba;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 3px 0 #b2916a;
+            transition: 0.07s linear;
+        }
+        button:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #b2916a;
+        }
+        button.primary {
+            background: #cbaa7a;
+            color: #2a241e;
+            box-shadow: 0 3px 0 #8f6e48;
+        }
+
+        .verse-card {
+            background: #fffaf0;
+            border-left: 6px solid #e2bc7c;
+            padding: 0.9rem 1.2rem;
+            margin-bottom: 1rem;
+            border-radius: 24px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .verse-ref {
+            font-weight: 800;
+            color: #ac7c42;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+        .verse-text {
+            font-size: 0.98rem;
+            line-height: 1.5;
+        }
+        .chapter-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0.5rem 0 1rem;
+            color: #9b6e3e;
+            border-left: 5px solid #e7bc7e;
+            padding-left: 16px;
+        }
+
+        .ai-area {
+            background: #fef7ea;
+            border-top: 1px solid #eddabc;
+        }
+        .api-status {
+            font-size: 0.7rem;
+            color: #a07342;
+            margin-top: 8px;
+        }
+        .ai-answer {
+            background: #fff5e6;
+            padding: 14px 18px;
+            border-radius: 28px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            border-left: 4px solid #cb9a5a;
+        }
+        .note-item {
+            background: #fff2e2;
+            padding: 8px 14px;
+            border-radius: 40px;
+            margin: 6px 0;
+            font-size: 0.85rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .delete-note {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #b56a3c;
+            box-shadow: none;
+            width: auto;
+            padding: 0 8px;
+        }
+        hr {
+            margin: 12px 0;
+            border: none;
+            height: 1px;
+            background: #eeddbf;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            padding: 1rem;
+            color: #9c855f;
+            background: #f9efdf;
+        }
+        @media (max-width: 600px) {
+            body { padding: 8px; }
+            .card { margin: 12px 14px; padding: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>📖 立體聖經 <small>和合本 + AI 助手</small></h1>
+        <p>讀經・真實DeepSeek・筆記隨行</p>
+    </div>
+
+    <div class="card">
+        <div class="control-group">
+            <label>📜 書卷</label>
+            <select id="bookSelect"></select>
+        </div>
+        <div class="control-group">
+            <label>📖 章節</label>
+            <select id="chapterSelect"></select>
+            <button id="loadChapterBtn" class="primary" style="margin-top: 12px;">📄 讀取章節</button>
+        </div>
+        <div class="control-group">
+            <label>🔍 全文搜尋</label>
+            <input type="text" id="searchInput" placeholder="例如：愛、信心、耶穌">
+            <button id="searchBtn">🔎 搜尋經文</button>
+        </div>
+        <div class="control-group">
+            <label>✨ 隨機金句</label>
+            <button id="randomBtn">🎲 隨機一節經文</button>
+        </div>
+    </div>
+
+    <div class="card" id="displayArea">
+        <div class="chapter-title" id="chapterTitle">📖 歡迎</div>
+        <div id="versesContainer">請選擇書卷與章節</div>
+    </div>
+
+    <div class="card">
+        <label>📝 筆記 (目前章節)   <span style="font-size:0.7rem;">自動儲存</span></label>
+        <textarea id="noteText" rows="2" placeholder="寫下讀經心得..."></textarea>
+        <button id="saveNoteBtn" style="margin-top: 8px;">💾 儲存筆記</button>
+        <div id="notesList"></div>
+    </div>
+
+    <div class="card ai-area">
+        <div class="control-group">
+            <label>🔑 DeepSeek API Key</label>
+            <input type="password" id="apiKeyInput" placeholder="sk-xxxx ...">
+            <button id="saveApiKeyBtn" style="margin-top: 5px;">💾 儲存 Key (localStorage)</button>
+            <div class="api-status" id="apiStatus">⚡ 未設定 Key，請輸入並儲存</div>
+        </div>
+        <div class="control-group">
+            <label>🤖 詢問 AI (聖經問題)</label>
+            <input type="text" id="aiQuestion" placeholder="例如：什麼是愛？如何禱告？">
+            <button id="askAiBtn" class="primary">💬 傳送給 DeepSeek</button>
+        </div>
+        <div id="aiAnswer" class="ai-answer" style="display:none;"></div>
+    </div>
+    <footer>聖經文本·中文和合本｜真實DeepSeek API｜筆記自動儲存於瀏覽器</footer>
+</div>
+
+<script>
+    // ---------- 全域變數 ----------
+    let bibleArray = [];
+    let parsedVerses = [];
+    let booksMap = new Map();       // 縮寫 -> 全名
+    let bookChaptersMap = new Map(); // 縮寫 -> 章節陣列
+    let currentBook = '', currentChapter = 1;
+
+    // ---------- 聖經正典順序 (舊約+新約) ----------
+    const canonicalOrder = [
+        // 摩西五經
+        '創', '出', '利', '民', '申',
+        // 歷史書
+        '書', '士', '得', '撒上', '撒下', '王上', '王下', '代上', '代下', '拉', '尼', '斯',
+        // 詩歌智慧書
+        '伯', '詩', '箴', '傳', '歌',
+        // 大先知書
+        '賽', '耶', '哀', '結', '但',
+        // 小先知書
+        '何', '珥', '摩', '俄', '拿', '彌', '鴻', '哈', '番', '該', '亞', '瑪',
+        // 新約
+        '太', '可', '路', '約', '徒',
+        '羅', '林前', '林後', '加', '弗', '腓', '西', '帖前', '帖後', '提前', '提後', '多', '門',
+        '來', '雅', '彼前', '彼後', '約一', '約二', '約三', '猶', '啟'
+    ];
+
+    const fullNameMap = {
+        '創':'創世記','出':'出埃及記','利':'利未記','民':'民數記','申':'申命記',
+        '書':'約書亞記','士':'士師記','得':'路得記','撒上':'撒母耳記上','撒下':'撒母耳記下',
+        '王上':'列王紀上','王下':'列王紀下','代上':'歷代志上','代下':'歷代志下',
+        '拉':'以斯拉記','尼':'尼希米記','斯':'以斯帖記','伯':'約伯記','詩':'詩篇',
+        '箴':'箴言','傳':'傳道書','歌':'雅歌','賽':'以賽亞書','耶':'耶利米書',
+        '哀':'耶利米哀歌','結':'以西結書','但':'但以理書','何':'何西阿書','珥':'約珥書',
+        '摩':'阿摩司書','俄':'俄巴底亞書','拿':'約拿書','彌':'彌迦書','鴻':'那鴻書',
+        '哈':'哈巴谷書','番':'西番雅書','該':'哈該書','亞':'撒迦利亞書','瑪':'瑪拉基書',
+        '太':'馬太福音','可':'馬可福音','路':'路加福音','約':'約翰福音','徒':'使徒行傳',
+        '羅':'羅馬書','林前':'哥林多前書','林後':'哥林多後書','加':'加拉太書','弗':'以弗所書',
+        '腓':'腓立比書','西':'歌羅西書','帖前':'帖撒羅尼迦前書','帖後':'帖撒羅尼迦後書',
+        '提前':'提摩太前書','提後':'提摩太後書','多':'提多書','門':'腓利門書','來':'希伯來書',
+        '雅':'雅各書','彼前':'彼得前書','彼後':'彼得後書','約一':'約翰一書','約二':'約翰二書',
+        '約三':'約翰三書','猶':'猶大書','啟':'啟示錄'
+    };
+
+    // ---------- 解析經文 ----------
+    function parseLine(line) {
+        let bookAbbr = '';
+        let rest = line;
+        // 處理雙字節縮寫
+        const twoCharBooks = ['撒上','撒下','王上','王下','代上','代下','林前','林後','帖前','帖後','提前','提後','約一','約二','約三','彼前','彼後'];
+        for (let two of twoCharBooks) {
+            if (line.startsWith(two)) {
+                bookAbbr = two;
+                rest = line.slice(two.length);
+                break;
+            }
+        }
+        if (!bookAbbr) {
+            const match = line.match(/^([\u4e00-\u9fa5]+)(\d+):(\d+)\s+(.*)/);
+            if (!match) return null;
+            bookAbbr = match[1];
+            rest = line;
+        }
+        const regex = new RegExp(`^${bookAbbr}(\\d+):(\\d+)\\s+(.*)`);
+        const match = rest.match(regex);
+        if (!match) return null;
+        const chapter = parseInt(match[1]);
+        const verse = parseInt(match[2]);
+        const text = match[3];
+        return { book: bookAbbr, chapter, verse, text, fullName: fullNameMap[bookAbbr] || bookAbbr };
+    }
+
+    function buildIndex() {
+        parsedVerses = [];
+        booksMap.clear();
+        bookChaptersMap.clear();
+        for (let line of bibleArray) {
+            const v = parseLine(line);
+            if (!v) continue;
+            parsedVerses.push(v);
+            if (!booksMap.has(v.book)) booksMap.set(v.book, fullNameMap[v.book] || v.book);
+            if (!bookChaptersMap.has(v.book)) bookChaptersMap.set(v.book, new Set());
+            bookChaptersMap.get(v.book).add(v.chapter);
+        }
+        for (let [book, set] of bookChaptersMap.entries()) {
+            bookChaptersMap.set(book, Array.from(set).sort((a,b)=>a-b));
+        }
+        updateBookSelect();
+    }
+
+    // 依照正典順序更新書卷下拉選單
+    function updateBookSelect() {
+        const select = document.getElementById('bookSelect');
+        if (!select) return;
+        const availableBooks = new Set(booksMap.keys());
+        // 依照 canonicalOrder 過濾出存在的書卷，並保持順序
+        const ordered = canonicalOrder.filter(book => availableBooks.has(book));
+        // 若有額外書卷（不在順序表中）則附加在最後（按字母）
+        const extra = Array.from(availableBooks).filter(b => !canonicalOrder.includes(b)).sort();
+        const allBooks = [...ordered, ...extra];
+        
+        select.innerHTML = '<option value="">-- 選擇書卷 --</option>';
+        for (let b of allBooks) {
+            select.innerHTML += `<option value="${b}">${b} ${booksMap.get(b)}</option>`;
+        }
+        if (allBooks.length) select.value = allBooks[0];
+        updateChapterSelect();
+    }
+
+    function updateChapterSelect() {
+        const book = document.getElementById('bookSelect').value;
+        const chapSelect = document.getElementById('chapterSelect');
+        if (!book || !bookChaptersMap.has(book)) {
+            chapSelect.innerHTML = '<option>無章節</option>';
+            return;
+        }
+        const chapters = bookChaptersMap.get(book);
+        chapSelect.innerHTML = '';
+        for (let ch of chapters) {
+            chapSelect.innerHTML += `<option value="${ch}">第 ${ch} 章</option>`;
+        }
+        if (chapters.length) chapSelect.value = chapters[0];
+    }
+
+    function getChapterVerses(book, chapter) {
+        return parsedVerses.filter(v => v.book === book && v.chapter === chapter).sort((a,b)=>a.verse-b.verse);
+    }
+
+    function displayChapter(book, chapter) {
+        currentBook = book; currentChapter = chapter;
+        const verses = getChapterVerses(book, chapter);
+        const title = `${booksMap.get(book) || book} 第 ${chapter} 章`;
+        document.getElementById('chapterTitle').innerHTML = `📖 ${title}`;
+        let html = '';
+        for (let v of verses) {
+            html += `<div class="verse-card">
+                        <div class="verse-ref">${v.book}${v.chapter}:${v.verse}</div>
+                        <div class="verse-text">${v.text}</div>
+                    </div>`;
+        }
+        document.getElementById('versesContainer').innerHTML = html || '無經文';
+        loadNoteForChapter(book, chapter);
+    }
+
+    // 隨機金句
+    function randomVerse() {
+        if (!parsedVerses.length) return;
+        const rand = Math.floor(Math.random() * parsedVerses.length);
+        const v = parsedVerses[rand];
+        displayChapter(v.book, v.chapter);
+        setTimeout(() => {
+            const refs = document.querySelectorAll('.verse-ref');
+            for (let el of refs) {
+                if (el.innerText.includes(`${v.book}${v.chapter}:${v.verse}`)) {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.parentElement.style.backgroundColor = '#fce7cf';
+                    setTimeout(() => { if(el.parentElement) el.parentElement.style.backgroundColor = ''; }, 1000);
+                    break;
+                }
+            }
+        }, 100);
+    }
+
+    // 搜尋
+    function searchVerses(keyword) {
+        const lower = keyword.toLowerCase();
+        return parsedVerses.filter(v => v.text.toLowerCase().includes(lower));
+    }
+
+    function showSearchResults(keyword) {
+        const results = searchVerses(keyword);
+        if (!results.length) {
+            document.getElementById('versesContainer').innerHTML = `<div class="verse-card">🔍 沒有找到「${escapeHtml(keyword)}」</div>`;
+            document.getElementById('chapterTitle').innerHTML = `🔎 搜尋結果`;
+            return;
+        }
+        document.getElementById('chapterTitle').innerHTML = `🔎 「${keyword}」 共 ${results.length} 節`;
+        let html = '';
+        for (let v of results.slice(0, 50)) {
+            html += `<div class="verse-card" data-book="${v.book}" data-chapter="${v.chapter}" style="cursor:pointer;">
+                        <div class="verse-ref">${v.book}${v.chapter}:${v.verse}</div>
+                        <div class="verse-text">${v.text}</div>
+                    </div>`;
+        }
+        document.getElementById('versesContainer').innerHTML = html;
+        document.querySelectorAll('#versesContainer .verse-card[data-book]').forEach(card => {
+            card.addEventListener('click', () => {
+                const b = card.getAttribute('data-book');
+                const c = parseInt(card.getAttribute('data-chapter'));
+                if (b && c) {
+                    document.getElementById('bookSelect').value = b;
+                    updateChapterSelect();
+                    setTimeout(() => {
+                        document.getElementById('chapterSelect').value = c;
+                        displayChapter(b, c);
+                    }, 20);
+                }
+            });
+        });
+    }
+
+    // 筆記
+    function loadNoteForChapter(book, chapter) {
+        const key = `note_${book}_${chapter}`;
+        const saved = localStorage.getItem(key);
+        document.getElementById('noteText').value = saved || '';
+        showNotesList(book, chapter);
+    }
+
+    function saveCurrentNote() {
+        if (!currentBook || !currentChapter) return;
+        const note = document.getElementById('noteText').value;
+        const key = `note_${currentBook}_${currentChapter}`;
+        localStorage.setItem(key, note);
+        showNotesList(currentBook, currentChapter);
+    }
+
+    function showNotesList(book, chapter) {
+        const key = `note_${book}_${chapter}`;
+        const note = localStorage.getItem(key) || '';
+        const container = document.getElementById('notesList');
+        if (!note.trim()) {
+            container.innerHTML = '<div class="note-item">尚無筆記，可輸入上方文字儲存</div>';
+            return;
+        }
+        container.innerHTML = `<div class="note-item">
+            <span>📌 ${book}${chapter} 章筆記： ${note.substring(0, 60)}${note.length>60?'…':''}</span>
+            <button class="delete-note" data-key="${key}">🗑️</button>
+        </div>`;
+        const delBtn = container.querySelector('.delete-note');
+        if (delBtn) delBtn.addEventListener('click', () => {
+            localStorage.removeItem(key);
+            document.getElementById('noteText').value = '';
+            showNotesList(book, chapter);
+        });
+    }
+
+    // DeepSeek API
+    let storedApiKey = localStorage.getItem('deepseek_api_key') || '';
+
+    function initApiKeyUI() {
+        const input = document.getElementById('apiKeyInput');
+        if (storedApiKey) {
+            input.value = storedApiKey;
+            document.getElementById('apiStatus').innerHTML = '✅ API Key 已儲存 (可用)';
+        } else {
+            document.getElementById('apiStatus').innerHTML = '⚠️ 未設定 Key，請輸入並儲存';
+        }
+    }
+
+    document.getElementById('saveApiKeyBtn').addEventListener('click', () => {
+        const newKey = document.getElementById('apiKeyInput').value.trim();
+        if (newKey) {
+            localStorage.setItem('deepseek_api_key', newKey);
+            storedApiKey = newKey;
+            document.getElementById('apiStatus').innerHTML = '✅ API Key 已儲存';
+        } else {
+            localStorage.removeItem('deepseek_api_key');
+            storedApiKey = '';
+            document.getElementById('apiStatus').innerHTML = '⚠️ Key 已清除';
+        }
+    });
+
+    async function callDeepSeek(question) {
+        if (!storedApiKey) return '❗ 請先在上方輸入您的 DeepSeek API Key 並儲存。';
+        const answerDiv = document.getElementById('aiAnswer');
+        answerDiv.style.display = 'block';
+        answerDiv.innerHTML = '🤔 思考中，呼叫 DeepSeek ...';
+        try {
+            const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${storedApiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'deepseek-chat',
+                    messages: [
+                        { role: 'system', content: '你是一位聖經研讀助手，請根據聖經真理回答問題，並適當引用經文。' },
+                        { role: 'user', content: question }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 800
+                })
+            });
+            if (!response.ok) {
+                const err = await response.text();
+                return `❌ API 錯誤 (${response.status})：${err.substring(0, 200)}`;
+            }
+            const data = await response.json();
+            return data.choices[0].message.content;
+        } catch (e) {
+            return `❌ 連線失敗：${e.message}`;
+        }
+    }
+
+    async function askAI() {
+        const question = document.getElementById('aiQuestion').value.trim();
+        if (!question) { alert('請輸入問題'); return; }
+        const answer = await callDeepSeek(question);
+        const answerDiv = document.getElementById('aiAnswer');
+        answerDiv.style.display = 'block';
+        answerDiv.innerHTML = `<strong>🤖 DeepSeek 回答：</strong><br>${answer.replace(/\n/g, '<br>')}`;
+    }
+
+    // 載入 bibleText.js
+    function loadBibleScript() {
+        return new Promise((resolve, reject) => {
+            if (typeof bibleText !== 'undefined' && Array.isArray(bibleText)) {
+                bibleArray = bibleText;
+                buildIndex();
+                resolve(true);
+                return;
+            }
+            const script = document.createElement('script');
+            script.src = './bibleText.js';
+            script.onload = () => {
+                if (typeof bibleText !== 'undefined') {
+                    bibleArray = bibleText;
+                    buildIndex();
+                    resolve(true);
+                } else {
+                    reject('bibleText 未定義');
+                }
+            };
+            script.onerror = () => reject('載入 bibleText.js 失敗，請確認檔案在相同目錄');
+            document.head.appendChild(script);
+        });
+    }
+
+    function bindEvents() {
+        document.getElementById('bookSelect').addEventListener('change', () => updateChapterSelect());
+        document.getElementById('loadChapterBtn').addEventListener('click', () => {
+            const book = document.getElementById('bookSelect').value;
+            const chap = parseInt(document.getElementById('chapterSelect').value);
+            if (book && chap) displayChapter(book, chap);
+        });
+        document.getElementById('searchBtn').addEventListener('click', () => {
+            const kw = document.getElementById('searchInput').value.trim();
+            if (kw) showSearchResults(kw);
+            else alert('請輸入關鍵字');
+        });
+        document.getElementById('randomBtn').addEventListener('click', () => randomVerse());
+        document.getElementById('saveNoteBtn').addEventListener('click', () => saveCurrentNote());
+        document.getElementById('askAiBtn').addEventListener('click', () => askAI());
+        const aiInput = document.getElementById('aiQuestion');
+        aiInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') askAI(); });
+    }
+
+    (async function() {
+        await loadBibleScript().catch(err => {
+            console.warn(err);
+            bibleArray = ['創1:1 起初神創造天地。','約3:16 神愛世人。'];
+            buildIndex();
+        });
+        initApiKeyUI();
+        bindEvents();
+        if (Array.from(booksMap.keys()).length) {
+            const firstBook = canonicalOrder.find(b => booksMap.has(b)) || Array.from(booksMap.keys())[0];
+            const firstChap = bookChaptersMap.get(firstBook)?.[0] || 1;
+            displayChapter(firstBook, firstChap);
+        }
+    })();
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+</script>
+</body>
+</html>
